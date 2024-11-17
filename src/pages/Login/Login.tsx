@@ -1,22 +1,36 @@
-import { Button, Input, Space, Switch } from "antd";
+import { Button, Input, message, Space, Switch } from "antd";
 import OpenLockIcon from "../../assets/Icons/OpenLockIcon";
 import MailIcon from "../../assets/Icons/MailIcon";
 import Form, { Rule } from "antd/es/form";
+import { baseUrl } from "../../utils/baseUrl";
+import { CommonResponse, User } from "../../utils/types";
+import { errorAlert, successAlert } from "../../utils/alerts";
+import { setInLocalStorage } from "../../utils/localStorageUtils";
 
 export default function Login() {
   const [form] = Form.useForm();
+  const [messageApi, contextHolder] = message.useMessage();
 
-  const emailRules: Rule[] = [
-    { required: true, message: "Please enter your email" },
-    { type: "email", message: "Please enter a valid email" },
-  ];
+  const onFinish = async (values: any) => {
+    try {
+      const login = await fetch(`${baseUrl}/signin`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(values),
+      });
+      const loginData: CommonResponse<User> = await login.json();
 
-  const passwordRules: Rule[] = [
-    { required: true, message: "Please enter your password" },
-  ];
-  const onFinish = (values: any) => {
-    console.log("Form values:", values);
-    // Handle form submission logic here
+      if (loginData?.statusCode === 200) {
+        successAlert(messageApi, "Login successfull");
+        setInLocalStorage("userAccessToken", loginData?.token);
+      } else {
+        console.log('error', loginData?.error)
+        throw new Error(loginData?.error);
+      }
+    } catch (error: Error | any) {
+        console.log('error', error?.error)
+      errorAlert(messageApi, error?.message);
+    }
   };
 
   const onFinishFailed = (errorInfo: any) => {
@@ -25,7 +39,8 @@ export default function Login() {
   };
   return (
     <div className="w-full h-full flex justify-center items-center">
-      <div className="w-fit min-w-[25rem] px-16 py-20 rounded-2xl shadow-xl flex flex-col gap-8">
+    {contextHolder}
+      <div className="w-fit min-w-[25rem] px-16 py-20 rounded-2xl shadow-xl flex flex-col gap-8 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
         <div className="flex justify-center">
           <img
             src="https://www.str8bat.com/cdn/shop/files/Logo.png?v=1677442424&width=500"
@@ -35,7 +50,9 @@ export default function Login() {
         </div>
         <div className="text-center">
           <h1 className="text-2xl text-black font-bold">Welcome Back</h1>
-          <p className="text-base text-gray-600">Enter your details to log in</p>
+          <p className="text-base text-gray-600">
+            Enter your details to log in
+          </p>
         </div>
         <Form
           form={form}
@@ -45,10 +62,10 @@ export default function Login() {
           onFinishFailed={onFinishFailed}
           initialValues={{ remember: true }}
         >
-          <Form.Item name="email" rules={emailRules}>
+          <Form.Item name="email">
             <Input prefix={<MailIcon />} placeholder="Email" size="large" />
           </Form.Item>
-          <Form.Item name="password" rules={passwordRules}>
+          <Form.Item name="password">
             <Input.Password
               prefix={<OpenLockIcon />}
               placeholder="Password"
