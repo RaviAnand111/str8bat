@@ -6,10 +6,12 @@ import { baseUrl } from "../../utils/baseUrl";
 import { CommonResponse, User } from "../../utils/types";
 import { errorAlert, successAlert } from "../../utils/alerts";
 import { setInLocalStorage } from "../../utils/localStorageUtils";
+import { useNavigate } from "react-router-dom";
 
 export default function Login() {
   const [form] = Form.useForm();
   const [messageApi, contextHolder] = message.useMessage();
+  const navigate = useNavigate();
 
   const onFinish = async (values: any) => {
     try {
@@ -23,6 +25,7 @@ export default function Login() {
       if (loginData?.statusCode === 200) {
         successAlert(messageApi, "Login successfull");
         setInLocalStorage("userAccessToken", loginData?.token);
+        navigate(`/user/${loginData?.data?.user_id}`) 
       } else {
         console.log('error', loginData?.error)
         throw new Error(loginData?.error);
@@ -40,7 +43,7 @@ export default function Login() {
   return (
     <div className="w-full h-full flex justify-center items-center">
     {contextHolder}
-      <div className="w-fit min-w-[25rem] px-16 py-20 rounded-2xl shadow-xl flex flex-col gap-8 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+      <div className="w-fit min-w-[30rem] px-16 py-20 rounded-2xl shadow-xl flex flex-col gap-8 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
         <div className="flex justify-center">
           <img
             src="https://www.str8bat.com/cdn/shop/files/Logo.png?v=1677442424&width=500"

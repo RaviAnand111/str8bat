@@ -5,10 +5,13 @@ import { Tabs, TabsProps } from "antd";
 import PrivacyTab from "../../components/TabsComponents/PrivacyTab/PrivacyTab";
 import ProfileTab from "../../components/TabsComponents/ProfileTab/ProfileTab";
 import { baseUrl } from "../../utils/baseUrl";
+import { getFromLocalStorage } from "../../utils/localStorageUtils";
 
 export default function UserProfile() {
   const { userId } = useParams();
   const [userData, setUserData] = useState();
+
+  const userAccessToken = getFromLocalStorage("userAccessToken");
 
   const onChange = (key: string) => {
     console.log(key);
@@ -16,13 +19,19 @@ export default function UserProfile() {
 
   useEffect(() => {
     (async function () {
-      const signup = await fetch(`${baseUrl}/user`, {
-        method: "GET",
-        //headers: { "Content-Type": "application/json" },
-        //body: JSON.stringify({ name: "sahib", email: 'email@email.com', password: "password8" }),
-      });
-      const signupData = await signup.json();
-      console.log(signupData);
+      try {
+        const fetchedUserData = await fetch(`${baseUrl}/user`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${userAccessToken}`,
+          },
+        });
+        const fetchedUserDataJson = await fetchedUserData.json();
+        setUserData(fetchedUserDataJson?.data);
+      } catch (error) {
+        console.log(error);
+      }
     })();
   }, []);
 
@@ -31,21 +40,10 @@ export default function UserProfile() {
       key: "1",
       label: "Profile",
       children: (
-        <ProfileTab
-          userData={{
-            name: "Ravi",
-            gender: "Male",
-            profile_picture_url: "",
-            email: "email@email.com",
-            phone_number: "8367354162",
-          }}
-        />
+        <div className="w-full h-full ">
+          <ProfileTab userData={userData} />
+        </div>
       ),
-    },
-    {
-      key: "2",
-      label: "Privacy",
-      children: <PrivacyTab />,
     },
   ];
 

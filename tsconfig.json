@@ -6,7 +6,8 @@
     "moduleResolution": "node",
     "module": "esnext",
     "target": "esnext",
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "lib": ["dom", "es2015"]
   },
   "include": ["src/**/*", "rc-picker.d.ts", "rollup.d.ts"]
 }
