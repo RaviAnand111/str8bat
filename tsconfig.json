@@ -4,6 +4,9 @@
     "strict": true,
     "esModuleInterop": true,
     "moduleResolution": "node",
-   "module": "esnext",
-    "target": "esnext"}
+    "module": "esnext",
+    "target": "esnext",
+    "skipLibCheck": true
+  },
+  "include": ["src/**/*", "rc-picker.d.ts", "rollup.d.ts"]
 }
